@@ -6,7 +6,7 @@ import Observation
 @Observable
 class ImportViewModel {
     // 状态机 — 导入流程的各个阶段
-    enum ImportStage {
+    enum ImportStage: Equatable {
         case selectSource       // 选择来源（微信/支付宝/自定义）
         case selectFile         // 选择文件
         case parsing            // 正在解析

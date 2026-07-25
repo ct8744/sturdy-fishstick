@@ -1,6 +1,7 @@
 import Foundation
+import ZIPFoundation
 
-/// .xlsx 文件解析器 — 纯原生实现，无第三方依赖
+/// .xlsx 文件解析器 — 使用 ZIPFoundation 解压 ZIP 包，然后解析 XML
 /// .xlsx 本质是 ZIP 压缩包，包含 XML 格式的工作表数据
 class XLSXParser {
     /// 解析 xlsx 文件为行数据
@@ -16,7 +17,7 @@ class XLSXParser {
 
         // 解压 xlsx (ZIP)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        try FileManager.default.unzipItem(at: fileURL, to: tempDir)
+        try unzipXLSX(at: fileURL, to: tempDir)
 
         // 读取共享字符串表
         let sharedStrings = try parseSharedStrings(from: tempDir)
@@ -118,25 +119,22 @@ class XLSXParser {
     }
 }
 
-// MARK: - FileManager ZIP 扩展
-private extension FileManager {
-    /// 解压 ZIP 文件（使用 Foundation 内置的 NSFileCoordinator + 系统解压能力）
-    func unzipItem(at sourceURL: URL, to destinationURL: URL) throws {
-        // 使用 Process 调用系统 unzip 命令（macOS 内置）
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-        process.arguments = ["-o", sourceURL.path, "-d", destinationURL.path]
-
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
-
-        try process.run()
-        process.waitUntilExit()
-
-        guard process.terminationStatus == 0 else {
+    /// 使用 ZIPFoundation 解压 xlsx (ZIP) 到目标目录
+    private func unzipXLSX(at sourceURL: URL, to destinationURL: URL) throws {
+        guard let archive = Archive(url: sourceURL, accessMode: .read) else {
             throw XLSXError.unzipFailed
+        }
+        for entry in archive {
+            let entryURL = destinationURL.appendingPathComponent(entry.path)
+            try FileManager.default.createDirectory(
+                at: entryURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            var fileData = Data()
+            try archive.extract(entry, consumer: { data in
+                fileData.append(data)
+            })
+            try fileData.write(to: entryURL)
         }
     }
 }

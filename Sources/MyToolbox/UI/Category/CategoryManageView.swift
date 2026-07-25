@@ -62,7 +62,7 @@ struct CategoryManageView: View {
             ForEach(viewModel.mainCategories, id: \.id) { category in
                 HStack {
                     Image(systemName: category.iconName)
-                        .foregroundStyle(.accent)
+                        .foregroundStyle(.tint)
                     Text(category.name)
                         .fontWeight(viewModel.selectedMainCategory?.id == category.id ? .semibold : .regular)
                     Spacer()

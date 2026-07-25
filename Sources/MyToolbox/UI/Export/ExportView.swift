@@ -24,7 +24,7 @@ struct ExportView: View {
                 Button(action: { Task { await exportAll() } }) {
                     HStack {
                         Image(systemName: "tray.full")
-                            .foregroundStyle(.accent)
+                            .foregroundStyle(.tint)
                         VStack(alignment: .leading) {
                             Text("导出全部")
                             Text("所有账单记录")
@@ -42,7 +42,7 @@ struct ExportView: View {
                 Button(action: { Task { await exportThisMonth() } }) {
                     HStack {
                         Image(systemName: "calendar")
-                            .foregroundStyle(.accent)
+                            .foregroundStyle(.tint)
                         VStack(alignment: .leading) {
                             Text("导出本月")
                             Text(Date(), format: .dateTime.year().month())

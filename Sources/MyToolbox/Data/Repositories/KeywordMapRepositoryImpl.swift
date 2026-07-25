@@ -39,10 +39,10 @@ class KeywordMapRepositoryImpl: KeywordMapRepository {
         }
 
         // 通过 subCategoryID 查找关联的大类 ID
-        let subDescriptor = FetchDescriptor<SubCategory>(
-            predicate: #Predicate { $0.id == matched.subCategoryID }
-        )
-        guard let subCategory = try modelContext.fetch(subDescriptor).first else {
+        // iOS 17 的 #Predicate 对 UUID 比较偶尔推断失败，这里用全量 fetch + 内存过滤，数据量小完全够用。
+        let subDescriptor = FetchDescriptor<SubCategory>()
+        let allSubs = try modelContext.fetch(subDescriptor)
+        guard let subCategory = allSubs.first(where: { $0.id == matched.subCategoryID }) else {
             return nil
         }
 

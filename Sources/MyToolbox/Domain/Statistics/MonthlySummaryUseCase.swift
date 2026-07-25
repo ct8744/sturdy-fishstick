@@ -95,7 +95,7 @@ struct MonthlySummary {
     let totalIncome: Decimal
     let totalExpense: Decimal
     let balance: Decimal
-    let categoryBreakdowns: [CategoryBreakdown]
+    var categoryBreakdowns: [CategoryBreakdown]
     let dailyAverage: Decimal
 }
 
