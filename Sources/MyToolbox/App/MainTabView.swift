@@ -92,7 +92,7 @@ struct MainTabView: View {
                 Text(tab.title)
                     .font(.caption2)
             }
-            .foregroundStyle(selectedTab == tab ? .tint : .secondary)
+            .foregroundStyle(selectedTab == tab ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
             .frame(maxWidth: .infinity)
         }
     }
