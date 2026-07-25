@@ -1,0 +1,52 @@
+name: Build iOS IPA (unsigned)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build archive (no signing)
+        run: |
+          xcodebuild archive \
+            -project MyToolbox.xcodeproj \
+            -scheme MyToolbox \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/MyToolbox.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r "build/MyToolbox.xcarchive/Products/Applications/MyToolbox.app" build/Payload/
+          cd build && zip -r MyToolbox.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyToolbox.ipa
+          path: build/MyToolbox.ipa
+
+# 说明：
+# 1) 本流水线在云端 Mac 上编译，故意关闭签名（CODE_SIGNING_ALLOWED=NO），
+#    产出“未签名”的 IPA，交由你本机的 Sideloadly 用你的免费 Apple ID 重新签名安装。
+# 2) 若 archive 步骤因签名报错，可改用 build 方式（见下方注释）再手动打包：
+#    xcodebuild build -project MyToolbox.xcodeproj -scheme MyToolbox \
+#      -configuration Release -sdk iphoneos \
+#      -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO
+#    然后 cp -r build/Release-iphoneos/MyToolbox.app build/Payload/ 再 zip。
