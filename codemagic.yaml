@@ -1,0 +1,34 @@
+# Codemagic 备选方案（无需 GitHub Actions，直接连 Git 仓库即可）
+# 在 https://codemagic.io 用 GitHub 账号登录，添加本仓库，选择此文件即可。
+workflows:
+  ios-unsigned:
+    name: iOS Unsigned Build
+    instance_type: mac_mini_m1
+    max_build_duration: 30
+    environment:
+      vars:
+        XCODE_PROJECT: "MyToolbox.xcodeproj"
+        XCODE_SCHEME: "MyToolbox"
+    scripts:
+      - name: Install xcodegen
+        script: brew install xcodegen
+      - name: Generate Xcode project
+        script: xcodegen generate
+      - name: Build archive (no signing)
+        script: |
+          xcodebuild archive \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/MyToolbox.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+      - name: Package unsigned IPA
+        script: |
+          mkdir -p build/Payload
+          cp -r build/MyToolbox.xcarchive/Products/Applications/MyToolbox.app build/Payload/
+          cd build && zip -r MyToolbox.ipa Payload
+    artifacts:
+      - build/MyToolbox.ipa
