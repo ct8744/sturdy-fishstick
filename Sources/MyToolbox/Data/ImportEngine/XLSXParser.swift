@@ -117,7 +117,6 @@ class XLSXParser {
         let texts = extractTextBetweenTags(xml, tag: tag)
         return texts.first
     }
-}
 
     /// 使用 ZIPFoundation 解压 xlsx (ZIP) 到目标目录
     private func unzipXLSX(at sourceURL: URL, to destinationURL: URL) throws {
