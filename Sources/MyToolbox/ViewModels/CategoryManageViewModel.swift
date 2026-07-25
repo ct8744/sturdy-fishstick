@@ -170,8 +170,11 @@ class CategoryManageViewModel {
         isShowingKeywordEditor = true
         editingKeywordText = ""
         Task {
-            keywordMaps = (try? await keywordRepo.fetchAll())?
-                .filter { $0.subCategoryID == subCategory.id } ?? []
+        if let allMaps = try? await keywordRepo.fetchAll() {
+            keywordMaps = allMaps.filter { $0.subCategoryID == subCategory.id }
+        } else {
+            keywordMaps = []
+        }
         }
     }
 

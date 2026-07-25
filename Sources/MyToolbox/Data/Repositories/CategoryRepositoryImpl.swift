@@ -15,11 +15,8 @@ class CategoryRepositoryImpl: CategoryRepository {
     }
 
     func fetchSubCategories(for mainCategoryID: UUID) async throws -> [SubCategory] {
-        let descriptor = FetchDescriptor<SubCategory>(
-            predicate: #Predicate { $0.mainCategoryID == mainCategoryID },
-            sortBy: [SortDescriptor(\.sortOrder)]
-        )
-        return try modelContext.fetch(descriptor)
+        let all = try await fetchAllSubCategories()
+        return all.filter { $0.mainCategoryID == mainCategoryID }
     }
 
     func fetchAllSubCategories() async throws -> [SubCategory] {

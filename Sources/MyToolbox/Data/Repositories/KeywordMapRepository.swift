@@ -7,4 +7,5 @@ protocol KeywordMapRepository {
     func update(_ map: KeywordMap) async throws
     func delete(_ map: KeywordMap) async throws
     func deleteAll(for subCategoryID: UUID) async throws
+    func deleteAll() async throws
 }

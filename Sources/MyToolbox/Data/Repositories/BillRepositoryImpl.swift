@@ -15,10 +15,8 @@ class BillRepositoryImpl: BillRepository {
     }
 
     func fetchByID(_ id: UUID) async throws -> BillRecord? {
-        let descriptor = FetchDescriptor<BillRecord>(
-            predicate: #Predicate { $0.id == id }
-        )
-        return try modelContext.fetch(descriptor).first
+        let all = try await fetchAll()
+        return all.first { $0.id == id }
     }
 
     func fetchByMonth(year: Int, month: Int) async throws -> [BillRecord] {
@@ -26,35 +24,23 @@ class BillRepositoryImpl: BillRepository {
         let startDate = calendar.date(from: DateComponents(year: year, month: month, day: 1))!
         let endDate = calendar.date(byAdding: .month, value: 1, to: startDate)!
 
-        let descriptor = FetchDescriptor<BillRecord>(
-            predicate: #Predicate { $0.transactionTime >= startDate && $0.transactionTime < endDate },
-            sortBy: [SortDescriptor(\.transactionTime, order: .reverse)]
-        )
-        return try modelContext.fetch(descriptor)
+        let all = try await fetchAll()
+        return all.filter { $0.transactionTime >= startDate && $0.transactionTime < endDate }
     }
 
     func fetchByDateRange(start: Date, end: Date) async throws -> [BillRecord] {
-        let descriptor = FetchDescriptor<BillRecord>(
-            predicate: #Predicate { $0.transactionTime >= start && $0.transactionTime <= end },
-            sortBy: [SortDescriptor(\.transactionTime, order: .reverse)]
-        )
-        return try modelContext.fetch(descriptor)
+        let all = try await fetchAll()
+        return all.filter { $0.transactionTime >= start && $0.transactionTime <= end }
     }
 
     func fetchByCategory(mainCategoryID: UUID) async throws -> [BillRecord] {
-        let descriptor = FetchDescriptor<BillRecord>(
-            predicate: #Predicate { $0.mainCategoryID == mainCategoryID },
-            sortBy: [SortDescriptor(\.transactionTime, order: .reverse)]
-        )
-        return try modelContext.fetch(descriptor)
+        let all = try await fetchAll()
+        return all.filter { $0.mainCategoryID == mainCategoryID }
     }
 
     func fetchByCategory(subCategoryID: UUID) async throws -> [BillRecord] {
-        let descriptor = FetchDescriptor<BillRecord>(
-            predicate: #Predicate { $0.subCategoryID == subCategoryID },
-            sortBy: [SortDescriptor(\.transactionTime, order: .reverse)]
-        )
-        return try modelContext.fetch(descriptor)
+        let all = try await fetchAll()
+        return all.filter { $0.subCategoryID == subCategoryID }
     }
 
     func add(_ record: BillRecord) async throws {

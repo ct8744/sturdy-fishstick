@@ -81,4 +81,15 @@ class KeywordMapRepositoryImpl: KeywordMapRepository {
         try modelContext.save()
         cachedMaps.removeAll { $0.subCategoryID == subCategoryID }
     }
+
+    func deleteAll() async throws {
+        if !cacheLoaded {
+            _ = try await fetchAll()
+        }
+        for map in cachedMaps {
+            modelContext.delete(map)
+        }
+        try modelContext.save()
+        cachedMaps.removeAll()
+    }
 }
