@@ -37,12 +37,12 @@ class XLSXParser {
                 let colIdx = columnLetter(from: cell.reference)
                 if let value = cell.value {
                     cellMap[colIdx] = value
-                } else if cell.type == "s", let stringIdxStr = cell.value, let stringIdx = Int(stringIdxStr) {
+                } else if cell.type == .sharedString, let stringIdxStr = cell.value, let stringIdx = Int(stringIdxStr) {
                     // 共享字符串
                     if let strings = sharedStrings {
                         let items = strings.items
                         if stringIdx < items.count,
-                           case .text(let text) = items[stringIdx] {
+                           let text = items[stringIdx].text {
                             cellMap[colIdx] = text
                         }
                     }
