@@ -116,21 +116,7 @@ class ImportViewModel {
             return
         }
 
-        // 选择对应的解析器
-        let parser: BillParser
-        let fileExt = fileURL.pathExtension.lowercased()
-
-        if fileExt == "xlsx" {
-            let xlsxParser = XLSXParser()
-            // 将 xlsx 解析结果包装为 BillParser
-            parser = XLSXBridgeParser(xlsxParser: xlsxParser, format: format)
-        } else if format == .wechat {
-            parser = WeChatParser()
-        } else {
-            parser = AlipayParser()
-        }
-
-        importOrchestrator = ImportOrchestrator(billParser: parser, billRepository: billRepository)
+        importOrchestrator = ImportOrchestrator(billRepository: billRepository)
 
         importProgress = 0.4
 
@@ -195,29 +181,4 @@ class ImportViewModel {
     }
 }
 
-// MARK: - XLSX 桥接解析器
 
-/// 将 XLSXParser 包装为 BillParser 协议
-class XLSXBridgeParser: BillParser {
-    private let xlsxParser: XLSXParser
-    private let format: FileFormat
-
-    init(xlsxParser: XLSXParser, format: FileFormat) {
-        self.xlsxParser = xlsxParser
-        self.format = format
-    }
-
-    func parse(fileURL: URL, format: FileFormat) async throws -> [RawImportRecord] {
-        let (_, rows) = try xlsxParser.parse(fileURL: fileURL)
-
-        return rows.map { row in
-            RawImportRecord(
-                transactionTime: row.indices.contains(0) ? row[0] : "",
-                typeRaw: row.indices.contains(1) ? row[1] : "",
-                amountRaw: row.indices.contains(2) ? row[2] : "",
-                merchantName: row.indices.contains(3) ? row[3] : "",
-                productDescription: row.indices.contains(4) ? row[4] : ""
-            )
-        }
-    }
-}

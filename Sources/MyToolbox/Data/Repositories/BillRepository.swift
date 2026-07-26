@@ -1,6 +1,9 @@
 import Foundation
+import Combine
 
 protocol BillRepository {
+    var didChange: AnyPublisher<Void, Never> { get }
+
     func fetchAll() async throws -> [BillRecord]
     func fetchByID(_ id: UUID) async throws -> BillRecord?
     func fetchByMonth(year: Int, month: Int) async throws -> [BillRecord]

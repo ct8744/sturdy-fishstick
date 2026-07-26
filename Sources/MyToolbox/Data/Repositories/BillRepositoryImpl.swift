@@ -1,9 +1,15 @@
 import Foundation
 import SwiftData
+import Combine
 
 @MainActor
 class BillRepositoryImpl: BillRepository {
     private let modelContext: ModelContext
+    private let changeSubject = PassthroughSubject<Void, Never>()
+
+    var didChange: AnyPublisher<Void, Never> {
+        changeSubject.eraseToAnyPublisher()
+    }
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -46,6 +52,7 @@ class BillRepositoryImpl: BillRepository {
     func add(_ record: BillRecord) async throws {
         modelContext.insert(record)
         try modelContext.save()
+        changeSubject.send()
     }
 
     func addBatch(_ records: [BillRecord]) async throws {
@@ -53,15 +60,18 @@ class BillRepositoryImpl: BillRepository {
             modelContext.insert(record)
         }
         try modelContext.save()
+        changeSubject.send()
     }
 
     func update(_ record: BillRecord) async throws {
         try modelContext.save()
+        changeSubject.send()
     }
 
     func delete(_ record: BillRecord) async throws {
         modelContext.delete(record)
         try modelContext.save()
+        changeSubject.send()
     }
 
     func deleteBatch(_ records: [BillRecord]) async throws {
@@ -69,5 +79,6 @@ class BillRepositoryImpl: BillRepository {
             modelContext.delete(record)
         }
         try modelContext.save()
+        changeSubject.send()
     }
 }

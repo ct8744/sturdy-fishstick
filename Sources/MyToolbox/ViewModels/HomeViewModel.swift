@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Observation
+import Combine
 
 @MainActor
 @Observable
@@ -21,6 +22,7 @@ class HomeViewModel {
     private let summaryUseCase: MonthlySummaryUseCase
     private let billRepository: BillRepository
     private let categoryRepo: CategoryRepository
+    private var cancellables = Set<AnyCancellable>()
 
     init(
         summaryUseCase: MonthlySummaryUseCase,
@@ -30,6 +32,15 @@ class HomeViewModel {
         self.summaryUseCase = summaryUseCase
         self.billRepository = billRepository
         self.categoryRepo = categoryRepo
+
+        // 订阅数据变更，自动刷新
+        billRepository.didChange
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task { await self.loadMonthData() }
+            }
+            .store(in: &cancellables)
     }
 
     func onAppear() async {
@@ -62,18 +73,6 @@ class HomeViewModel {
 
         do {
             summary = try await summaryUseCase.calculate(year: year, month: month)
-
-            // 填充分类名称
-            if var s = summary {
-                for i in 0..<s.categoryBreakdowns.count {
-                    s.categoryBreakdowns[i] = CategoryBreakdown(
-                        categoryID: s.categoryBreakdowns[i].categoryID,
-                        totalAmount: s.categoryBreakdowns[i].totalAmount,
-                        percentage: s.categoryBreakdowns[i].percentage
-                    )
-                }
-                summary = s
-            }
 
             await loadRanking()
             await loadRecentRecords()

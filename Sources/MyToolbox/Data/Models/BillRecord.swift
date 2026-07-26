@@ -19,6 +19,9 @@ class BillRecord {
     var mainCategoryID: UUID?
     var subCategoryID: UUID?
 
+    // 收入分类 — 仅 type == .income 时使用，独立于支出分类体系
+    var incomeCategory: String?
+
     // 商户名 — 导入时从文件读取，只读展示，不可编辑
     var merchantName: String
 
@@ -38,6 +41,7 @@ class BillRecord {
         amount: Decimal,
         mainCategoryID: UUID? = nil,
         subCategoryID: UUID? = nil,
+        incomeCategory: String? = nil,
         merchantName: String = "",
         tag: String = "",
         createdAt: Date = Date(),
@@ -49,6 +53,7 @@ class BillRecord {
         self.amount = amount
         self.mainCategoryID = mainCategoryID
         self.subCategoryID = subCategoryID
+        self.incomeCategory = incomeCategory
         self.merchantName = merchantName
         self.tag = tag
         self.createdAt = createdAt

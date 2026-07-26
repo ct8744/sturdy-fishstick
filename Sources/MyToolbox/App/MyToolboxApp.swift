@@ -30,7 +30,7 @@ struct MyToolboxApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            AppShellView()
                 .modelContainer(modelContainer)
                 .onAppear {
                     seedDefaultData()

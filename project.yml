@@ -5,9 +5,9 @@ options:
     iOS: "17.0"
   createScheme: true
 packages:
-  ZIPFoundation:
-    url: https://github.com/weichsel/ZIPFoundation
-    from: 0.9.0
+  CoreXLSX:
+    url: https://github.com/CoreOffice/CoreXLSX
+    from: 0.14.0
 settings:
   base:
     SWIFT_VERSION: "5.9"
@@ -30,5 +30,5 @@ targets:
       - path: Sources/MyToolbox
       - path: MyToolbox/Assets.xcassets
     dependencies:
-      - package: ZIPFoundation
-        product: ZIPFoundation
+      - package: CoreXLSX
+        product: CoreXLSX

@@ -18,6 +18,7 @@ class CategoryManageViewModel {
     var keywordMaps: [KeywordMap] = []
     var isShowingKeywordEditor: Bool = false
     var editingKeywordText: String = ""
+    var editingKeywordSubCategoryID: UUID?
 
     // 删除确认
     var showDeleteConfirmation: Bool = false
@@ -144,18 +145,23 @@ class CategoryManageViewModel {
 
         Task {
             switch item {
+            case .addMain:
+                try await manageUseCase.createMainCategory(name: editingText)
+            case .addSub(let main):
+                try await manageUseCase.createSubCategory(name: editingText, mainCategoryID: main.id)
             case .renameMain(let category):
                 guard category.name != editingText else { break }
                 try await manageUseCase.renameMainCategory(id: category.id, newName: editingText)
             case .renameSub(let category):
                 guard category.name != editingText else { break }
                 try await manageUseCase.renameSubCategory(id: category.id, newName: editingText)
-            default:
-                break
             }
             editingItem = nil
             editingText = ""
             await loadCategories()
+            if case .addSub(let main) = item {
+                await selectMainCategory(main)
+            }
         }
     }
 
@@ -169,12 +175,13 @@ class CategoryManageViewModel {
     func showKeywordEditor(for subCategory: SubCategory) {
         isShowingKeywordEditor = true
         editingKeywordText = ""
+        editingKeywordSubCategoryID = subCategory.id
         Task {
-        if let allMaps = try? await keywordRepo.fetchAll() {
-            keywordMaps = allMaps.filter { $0.subCategoryID == subCategory.id }
-        } else {
-            keywordMaps = []
-        }
+            if let allMaps = try? await keywordRepo.fetchAll() {
+                keywordMaps = allMaps.filter { $0.subCategoryID == subCategory.id }
+            } else {
+                keywordMaps = []
+            }
         }
     }
 

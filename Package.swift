@@ -13,13 +13,13 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.0")
+        .package(url: "https://github.com/CoreOffice/CoreXLSX.git", from: "0.14.0")
     ],
     targets: [
         .target(
             name: "MyToolbox",
             dependencies: [
-                .product(name: "ZIPFoundation", package: "ZIPFoundation")
+                .product(name: "CoreXLSX", package: "CoreXLSX")
             ],
             path: "Sources/MyToolbox",
             resources: []

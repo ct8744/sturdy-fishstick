@@ -1,13 +1,11 @@
 import Foundation
 
 /// 导入全流程编排器
-/// 1. 解析文件 → 2. 映射为标准记录 → 3. 去重 → 4. 自动分类 → 5. 返回结果
+/// 1. 使用 BillParserFactory 创建解析器 → 2. 解析文件 → 3. 映射为标准记录 → 4. 去重 → 5. 返回结果
 class ImportOrchestrator {
-    private let billParser: BillParser
     private let billRepository: BillRepository
 
-    init(billParser: BillParser, billRepository: BillRepository) {
-        self.billParser = billParser
+    init(billRepository: BillRepository) {
         self.billRepository = billRepository
     }
 
@@ -17,8 +15,11 @@ class ImportOrchestrator {
         format: FileFormat,
         deduplicate: Bool
     ) async throws -> ImportResult {
-        // 1. 解析文件
-        let rawRecords = try await billParser.parse(fileURL: fileURL, format: format)
+        let fileExtension = fileURL.pathExtension
+
+        // 1. 创建解析器并解析
+        let parser = BillParserFactory.makeParser(format: format, fileExtension: fileExtension)
+        let rawRecords = try await parser.parse(fileURL: fileURL, format: format)
 
         // 2. 映射为标准 BillRecord
         var records: [BillRecord] = []
@@ -34,7 +35,7 @@ class ImportOrchestrator {
             (records, duplicates) = try await performDeduplication(records: records)
         }
 
-        // 4. 未匹配分类的记录暂不处理，等待后续自动分类
+        // 4. 返回结果
         return ImportResult(
             totalCount: rawRecords.count,
             records: records,

@@ -9,6 +9,7 @@ class AddRecordViewModel {
     var type: TransactionType = .expense
     var selectedMainCategory: MainCategory?
     var selectedSubCategory: SubCategory?
+    var selectedIncomeCategory: IncomeCategory?
     var availableSubCategories: [SubCategory] = []
     var tag: String = ""
     var transactionTime: Date = Date()
@@ -20,9 +21,13 @@ class AddRecordViewModel {
     var mainCategories: [MainCategory] = []
 
     var isFormValid: Bool {
-        !amount.isEmpty &&
-        (Decimal(string: amount) ?? 0) > 0 &&
-        selectedSubCategory != nil
+        guard !amount.isEmpty, (Decimal(string: amount) ?? 0) > 0 else { return false }
+        switch type {
+        case .expense:
+            return selectedSubCategory != nil
+        case .income:
+            return selectedIncomeCategory != nil
+        }
     }
 
     private let billRepository: BillRepository
@@ -38,6 +43,7 @@ class AddRecordViewModel {
         if let first = mainCategories.first {
             selectMainCategory(first)
         }
+        selectedIncomeCategory = IncomeCategory.salary
     }
 
     func selectMainCategory(_ category: MainCategory) {
@@ -70,8 +76,9 @@ class AddRecordViewModel {
             transactionTime: transactionTime,
             type: type,
             amount: amountValue,
-            mainCategoryID: selectedMainCategory?.id,
-            subCategoryID: selectedSubCategory?.id,
+            mainCategoryID: type == .expense ? selectedMainCategory?.id : nil,
+            subCategoryID: type == .expense ? selectedSubCategory?.id : nil,
+            incomeCategory: type == .income ? selectedIncomeCategory?.rawValue : nil,
             tag: tag
         )
 

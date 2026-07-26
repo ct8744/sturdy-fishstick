@@ -18,7 +18,7 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Resolve Swift packages (ZIPFoundation)
+      - name: Resolve Swift packages (CoreXLSX)
         run: xcodebuild -project MyToolbox.xcodeproj -scheme MyToolbox -resolvePackageDependencies
 
       - name: Build archive (no signing)

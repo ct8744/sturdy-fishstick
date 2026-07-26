@@ -42,27 +42,36 @@ struct AddRecordView: View {
                                displayedComponents: [.date, .hourAndMinute])
                 }
 
-                // 分类选择
+                // 分类选择（按类型切换）
                 Section("分类") {
-                    if viewModel.mainCategories.isEmpty {
-                        Text("请先在分类管理中创建分类")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Picker("大类", selection: Binding(
-                            get: { viewModel.selectedMainCategory },
-                            set: { if let c = $0 { viewModel.selectMainCategory(c) } }
-                        )) {
-                            ForEach(viewModel.mainCategories, id: \.id) { cat in
-                                Text(cat.name).tag(cat as MainCategory?)
+                    if viewModel.type == .income {
+                        Picker("收入分类", selection: $viewModel.selectedIncomeCategory) {
+                            Text("请选择").tag(nil as IncomeCategory?)
+                            ForEach(IncomeCategory.allCases) { cat in
+                                Text(cat.displayName).tag(cat as IncomeCategory?)
                             }
                         }
+                    } else {
+                        if viewModel.mainCategories.isEmpty {
+                            Text("请先在分类管理中创建分类")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Picker("大类", selection: Binding(
+                                get: { viewModel.selectedMainCategory },
+                                set: { if let c = $0 { viewModel.selectMainCategory(c) } }
+                            )) {
+                                ForEach(viewModel.mainCategories, id: \.id) { cat in
+                                    Text(cat.name).tag(cat as MainCategory?)
+                                }
+                            }
 
-                        Picker("小类", selection: Binding(
-                            get: { viewModel.selectedSubCategory },
-                            set: { if let c = $0 { viewModel.selectSubCategory(c) } }
-                        )) {
-                            ForEach(viewModel.availableSubCategories, id: \.id) { sub in
-                                Text(sub.name).tag(sub as SubCategory?)
+                            Picker("小类", selection: Binding(
+                                get: { viewModel.selectedSubCategory },
+                                set: { if let c = $0 { viewModel.selectSubCategory(c) } }
+                            )) {
+                                ForEach(viewModel.availableSubCategories, id: \.id) { sub in
+                                    Text(sub.name).tag(sub as SubCategory?)
+                                }
                             }
                         }
                     }
